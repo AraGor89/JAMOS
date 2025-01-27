@@ -25,6 +25,7 @@ import {
   ResetPasswordFormT,
 } from "@/types/common";
 import SubmitButton from "../submitButton/SubmitButton";
+import Link from "next/link";
 
 const ResetPass = () => {
   const { id, token } = useParams();
@@ -49,6 +50,8 @@ const ResetPass = () => {
     isPending,
     // isError,
     // error,
+    isError: isResetError,
+    isSuccess: isResetSuccess,
   } = useMutation({
     mutationFn: (formData: ResetPasswordFormAndUrlParamsT) =>
       resetPassword(formData),
@@ -146,6 +149,11 @@ const ResetPass = () => {
         isPending={isPending}
         isDisabled={!!requestResult?.message || isPending}
       />
+      {(isResetSuccess || isResetError) && (
+        <Link href="/" style={{ textDecoration: "underline" }}>
+          Go to home page
+        </Link>
+      )}
     </Typography>
   );
 };

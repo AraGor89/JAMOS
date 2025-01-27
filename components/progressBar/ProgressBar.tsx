@@ -1,6 +1,6 @@
-import React, { useState, useRef, useEffect, FC } from "react";
+import React, { useState, FC } from "react";
 import DeleteOutlineOutlinedIcon from "@mui/icons-material/DeleteOutlineOutlined";
-import { Box, Typography, IconButton } from "@mui/material";
+import { Box, Typography, IconButton, Slider } from "@mui/material";
 import { formatDate } from "@/utils";
 import { CharacteristicT } from "@/types/common";
 
@@ -16,71 +16,6 @@ const ProgressBar: FC<PropsT> = ({
   handleDeleteChar,
 }) => {
   const [progress, setProgress] = useState(character.value);
-  const [dragging, setDragging] = useState(false);
-  const containerRef = useRef<HTMLDivElement | null>(null);
-  const isFirstRender = useRef(true);
-
-  const handleDown = () => {
-    setDragging(true);
-  };
-
-  const handleUp = () => {
-    setDragging(false);
-  };
-
-  const handleMove = (clientX: number) => {
-    if (dragging && containerRef.current) {
-      const containerWidth = containerRef.current.offsetWidth;
-      const newPosition = (clientX * 100) / containerWidth;
-      setProgress(Math.min(Math.max(newPosition, 0), 100));
-      isFirstRender.current = false;
-    }
-  };
-
-  const handleMouseDown = (
-    event: React.MouseEvent<HTMLDivElement, MouseEvent>
-  ) => {
-    handleDown();
-    handleMove(event.clientX);
-  };
-
-  const handleTouchStart = (event: React.TouchEvent<HTMLDivElement>) => {
-    handleDown();
-    handleMove(event.touches[0].clientX);
-  };
-
-  const handleMoveEvent = (event: MouseEvent | TouchEvent) => {
-    if (event instanceof MouseEvent) {
-      handleMove(event.clientX);
-    } else if (event instanceof TouchEvent) {
-      handleMove(event.touches[0].clientX);
-    }
-  };
-
-  useEffect(() => {
-    document.addEventListener("mousemove", handleMoveEvent);
-    document.addEventListener("mouseup", handleUp);
-    document.addEventListener("touchmove", handleMoveEvent);
-    document.addEventListener("touchend", handleUp);
-
-    return () => {
-      document.removeEventListener("mousemove", handleMoveEvent);
-      document.removeEventListener("mouseup", handleUp);
-      document.removeEventListener("touchmove", handleMoveEvent);
-      document.removeEventListener("touchend", handleUp);
-    };
-  }, [dragging]);
-
-  useEffect(() => {
-    if (!dragging && !isFirstRender.current) {
-      handleEditChar(character.character, +progress.toFixed());
-    }
-  }, [progress, dragging]);
-
-  useEffect(() => {
-    setProgress(character.value);
-    isFirstRender.current = true;
-  }, [character]);
 
   const charInfo = [
     { text: character?.character, value: `${progress.toFixed()}%` },
@@ -90,8 +25,24 @@ const ProgressBar: FC<PropsT> = ({
     { text: "Updated at:", value: formatDate(character?.updatedAt) },
   ];
 
+  const handleChangeCommitted = (
+    event: React.SyntheticEvent | Event,
+    value: number | number[]
+  ) => {
+    if (character.value !== +progress.toFixed()) {
+      handleEditChar(character.character, +progress.toFixed());
+    }
+  };
+
+  const handleChange = (
+    event: React.SyntheticEvent | Event,
+    value: number | number[]
+  ) => {
+    setProgress(value as number);
+  };
+
   return (
-    <>
+    <Typography component="div" style={{ padding: "0 15px" }}>
       <Box
         mb={2}
         display="flex"
@@ -134,39 +85,13 @@ const ProgressBar: FC<PropsT> = ({
           <DeleteOutlineOutlinedIcon color="error" />
         </IconButton>
       </Box>
-      <Box
-        ref={containerRef}
-        sx={{
-          width: "100%",
-          cursor: "pointer",
-          borderRadius: "50px",
-          position: "relative",
-          backgroundColor: "gray",
-        }}
-        onMouseDown={handleMouseDown}
-        onTouchStart={handleTouchStart}
-      >
-        <Box
-          sx={{
-            height: 10,
-            width: `${progress}%`,
-            borderRadius: "inherit",
-            backgroundColor: "primary.main",
-          }}
-        />
-        <Box
-          sx={{
-            top: -2,
-            width: 15,
-            height: 15,
-            borderRadius: "50%",
-            position: "absolute",
-            backgroundColor: "primary.main",
-            left: progress > 1 ? `calc(${progress}% - 15px)` : 0,
-          }}
-        />
-      </Box>
-    </>
+      <Slider
+        value={progress}
+        valueLabelDisplay="auto"
+        onChange={handleChange} // Update state dynamically
+        onChangeCommitted={handleChangeCommitted} // Make edit api call on release
+      />
+    </Typography>
   );
 };
 

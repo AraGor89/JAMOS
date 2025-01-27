@@ -59,11 +59,11 @@ const Header: FC<PropsT> = () => {
 
   const isAuth = !!data?.user;
 
-  const isMyPage = profileId === _id;
   const isHomePage = pathName === "/";
   const isSigninPage = pathName === "/signin";
-  const isPartnersPage = profileId === partner?.user;
   const isNotificationsPage = pathName === "/notifications";
+  const isMyPage = Boolean(profileId) && profileId === _id;
+  const isPartnersPage = Boolean(profileId) && profileId === partner?.user;
 
   const publicPaths: PathT[] = [
     {
@@ -221,8 +221,9 @@ const Header: FC<PropsT> = () => {
           alt="Logo"
           width={0}
           height={0}
-          style={{ width: "80%", height: "auto" }}
+          style={{ width: "80%", height: "auto", cursor: "pointer" }}
           priority
+          onClick={() => router.push("/")}
         />
       </Typography>
       <Divider />
@@ -245,8 +246,9 @@ const Header: FC<PropsT> = () => {
       alt="Logo"
       width={0}
       height={0}
-      style={{ width: "150px", height: "100px" }}
+      style={{ width: "150px", height: "100px", cursor: "pointer" }}
       priority
+      onClick={() => router.push("/")}
     />
   );
 

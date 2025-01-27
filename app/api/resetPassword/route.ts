@@ -29,8 +29,7 @@ export async function PUT(request: NextRequest) {
     const { password, email, _id } = oldUser;
     const secret = process.env.NEXTAUTH_SECRET + password;
     try {
-      // const verify = jwt.verify(token, secret);
-      // console.log("verify", verify);
+      const verify = jwt.verify(token, secret);
       const hashedPassword = await bcrypt.hash(formData.password, 10);
       const user = await User.updateOne(
         { _id: _id },
